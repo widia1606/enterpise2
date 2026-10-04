@@ -1,33 +1,38 @@
 const pool = require('../config/db');
 
-async function getAllProducts(){
+// Ambil semua produk
+async function getAllProducts() {
     const [rows] = await pool.query('SELECT * FROM products ORDER BY created_at DESC');
     return rows;
 }
 
+// Ambil produk berdasarkan id
 async function getProductById(id) {
     const [rows] = await pool.query('SELECT * FROM products WHERE id = ?', [id]);
     return rows[0];
 }
 
+// Simpan produk ke database
 async function createProduct(product) {
-    const { name, description, price, stock } = product;
+    const { name, description, price, stock, image } = product;
     const [result] = await pool.query(
-        'INSERT INTO products (name, description, price, stock) VALUES (?, ?, ?, ?)',
-        [name, description, price, stock]
+        'INSERT INTO products (name, description, price, stock, image) VALUES (?, ?, ?, ?, ?)', 
+        [name, description, price, stock, image]
     );
-    return getProductById(result.insertId);
+    return result.insertId;
 }
 
+// Update produk berdasarkan id
 async function updateProduct(id, product) {
-    const { name, description, price, stock } = product;
+    const { name, description, price, stock, image } = product;
     await pool.query(
-        'UPDATE products SET name = ?, description = ?, price = ?, stock = ? WHERE id = ?',
-        [name, description, price, stock, id]
+        'UPDATE products SET name = ?, description = ?, price = ?, stock = ?, image = ? WHERE id = ?', 
+        [name, description, price, stock, image, id]
     );
     return getProductById(id);
 }
 
+// Hapus produk berdasarkan id
 async function deleteProduct(id) {
     const [result] = await pool.query('DELETE FROM products WHERE id = ?', [id]);
     return result.affectedRows > 0;
@@ -38,25 +43,5 @@ module.exports = {
     getProductById,
     createProduct,
     updateProduct,
-    deleteProduct
+    deleteProduct,
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

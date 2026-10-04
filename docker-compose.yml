@@ -1,35 +1,34 @@
 services:
-  db:
-    image: mysql:8.4
-    environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
-      MYSQL_DATABASE: ${DB_NAME:-productdb}
-      MYSQL_USER: ${DB_USER:-appuser}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-apppassword}
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-    healthcheck:
-      test: ["CMD-SHELL", "mysql -h localhost -u$$MYSQL_USER -p$$MYSQL_PASSWORD -D$$MYSQL_DATABASE -e 'SELECT 1 FROM products LIMIT 1' --silent"]
-      interval: 5s
-      timeout: 5s
-      retries: 20
-
-  api:
-    build: .
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      PORT: 3000
-      DB_HOST: db
-      DB_USER: ${DB_USER:-appuser}
-      DB_PASSWORD: ${DB_PASSWORD:-apppassword}
-      DB_NAME: ${DB_NAME:-productdb}
+  product-services:
+    build: 
+      context: ./product-service
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"
+    environment:
+      - DB_HOST=product-db
+      - DB_USER=appuser
+      - DB_PASSWORD=apppassword
+      - DB_NAME=productdb
+    depends_on:
+      product-db:
+        condition: service_healthy
 
+  product-db:
+    image: mysql:8.0
+    environment:
+      - MYSQL_DATABASE=productdb
+      - MYSQL_USER=appuser
+      - MYSQL_PASSWORD=apppassword
+      - MYSQL_ROOT_PASSWORD=rootpassword
+    volumes:
+      - product-db-data:/var/lib/mysql
+      - ./database:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost","--user=root","--password=rootpassword"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 5s
 volumes:
-  mysql_data:
+  product-db-data:

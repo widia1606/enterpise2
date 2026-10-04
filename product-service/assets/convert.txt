@@ -1,0 +1,16 @@
+# 1. Gambar Create Data (POST Image Valid)
+$b64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes("product-service\assets\keyboard gaming.jpg"))
+Set-Content -LiteralPath "product-service\assets\keyboard gaming.jpg.b64" -Value $b64 -Encoding ascii -NoNewline
+(Get-Item "product-service\assets\keyboard gaming.jpg.b64").Length
+
+# 2. Gambar Large Data (POST Error > 2MB)
+$b64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes("product-service\assets\keyboard gaming.jpg"))
+$cleanB64 = $b64.TrimEnd('=')
+$b64Large = ($cleanB64) * 48
+Set-Content -LiteralPath "product-service\assets\keyboard gaming_Large.jpg.b64" -Value $b64Large -Encoding ascii -NoNewline
+(Get-Item "product-service\assets\keyboard gaming_Large.jpg.b64").Length
+
+# 3. Gambar Update Data (PUT Image Valid)
+$b64Update = [Convert]::ToBase64String([IO.File]::ReadAllBytes("product-service\assets\keyboard gaming update.jpg"))
+Set-Content -LiteralPath "product-service\assets\keyboard gaming update.jpg.b64" -Value $b64Update -Encoding ascii -NoNewline
+(Get-Item "product-service\assets\keyboard gaming update.jpg.b64").Length
